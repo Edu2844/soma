@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface TripulacionRepository extends MongoRepository<Tripulacion, String> {
 
-    Optional<Tripulacion> findByMissionId(String misionId);
+    Optional<Tripulacion> findByMisionId(String misionId);
 
 }

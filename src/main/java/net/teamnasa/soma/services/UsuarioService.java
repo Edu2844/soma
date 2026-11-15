@@ -5,16 +5,52 @@ import net.teamnasa.soma.models.Usuario;
 import net.teamnasa.soma.models.enums.RolUsuario;
 import net.teamnasa.soma.repositories.AstronautaRepository;
 import net.teamnasa.soma.repositories.UsuarioRepository;
+import org.springframework.security.config.authentication.PasswordEncoderParser;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final AstronautaRepository astronautaRepository;
-
+    private final PasswordEncoder passwordEncoder;
 
     public Usuario crear(String codigo, String passwordPlano, RolUsuario rol, String astronautaId){
-    return null;
+        if (usuarioRepository.exitingByCodigo(codigo)){
+            throw new IllegalStateException("Ya existe un usuario con el código: " + codigo);
+        }
+
+        return usuarioRepository.save(Usuario.builder()
+                .codigo(codigo)
+                .passwordHash(passwordEncoder.encode(passwordPlano))
+                .rol(rol)
+                .astronautaId(astronautaId)
+                .activo(true)
+                .build()
+        );
+    }
+
+    public List<Usuario> listar() {
+        return usuarioRepository.findAll();
+    }
+
+    public Usuario obtener(String id) {
+        return usuarioRepository.findById(id).orElseThrow(()-> new NoSuchElementException("Usuario no encontrado" + id));
+    }
+
+    public Usuario cambiarPassword(String id, String nuevaPassword) {
+        Usuario u = obtener(id);
+        u.setPasswordHash(passwordEncoder.encode(nuevaPassword));
+        return usuarioRepository.save(u);
+    }
+
+    public Usuario cambiarEstado(String id, boolean activo){
+        Usuario u = obtener(id);
+        u.setActivo(activo);
+        return usuarioRepository.save(u);
     }
 }

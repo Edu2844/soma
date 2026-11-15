@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DatosGenerales {
     private String grupoSanguineo;
-    private Double pesobaseKg;
-    private Integer fcReoposoBaseBpm;
+    private Double pesoBaseKg;
+    private Integer fcReposoBaseBpm;
 }
