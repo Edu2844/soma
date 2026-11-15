@@ -13,7 +13,7 @@ public interface UsuarioRepository extends MongoRepository<Usuario, String> {
 
     Optional<Usuario> findByRol(String rol);
 
-    boolean exitingByCodigo(String codigo);
+    boolean existsByCodigo(String codigo);
 
     Optional<Usuario> findByAstronautId(String astronautaId);
 }

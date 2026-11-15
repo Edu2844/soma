@@ -5,7 +5,6 @@ import net.teamnasa.soma.models.Usuario;
 import net.teamnasa.soma.models.enums.RolUsuario;
 import net.teamnasa.soma.repositories.AstronautaRepository;
 import net.teamnasa.soma.repositories.UsuarioRepository;
-import org.springframework.security.config.authentication.PasswordEncoderParser;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +19,7 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
 
     public Usuario crear(String codigo, String passwordPlano, RolUsuario rol, String astronautaId){
-        if (usuarioRepository.exitingByCodigo(codigo)){
+        if (usuarioRepository.existsByCodigo(codigo)){
             throw new IllegalStateException("Ya existe un usuario con el código: " + codigo);
         }
 
