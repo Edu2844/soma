@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.awt.print.Pageable;
+import java.util.List;
 
 @Repository
 public interface AlertaRepository extends MongoRepository<Alerta,String> {
@@ -19,6 +20,9 @@ public interface AlertaRepository extends MongoRepository<Alerta,String> {
 
     Page<Alerta> findBySeveridad(Severidad severidad, Pageable pagina);
 
+    Page<Alerta> findByAstronautaIdOrderByFechaDesc(String astronautaId, Pageable pageable);
 
+    List<Alerta> findByAstronautaIdAndEstado(String astronautaId, EstadoAlerta estado);
 
+    long countByEstadoAndSeveridad(EstadoAlerta estado, Severidad severidad);
 }
