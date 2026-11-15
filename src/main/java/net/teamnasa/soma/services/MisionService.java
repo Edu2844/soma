@@ -38,7 +38,7 @@ public class MisionService {
     }
 
     public List<Mision> listarPorFase(FaseMision fase) {
-        return misionRepository.findByFase(fase);
+        return misionRepository.findByFaseMision(fase);
     }
 
     public Mision obtener(String id) {

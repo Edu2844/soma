@@ -32,7 +32,7 @@ public class AstronautaService {
     }
 
     public List<Astronauta> listarPorTripulacion(String tripulacionId) {
-       return astronautaRepository.findByTripulationId(tripulacionId);
+       return astronautaRepository.findByTripulacionId(tripulacionId);
     }
 
     public Astronauta obtener(String id) {

@@ -27,11 +27,11 @@ public class ActividadService {
     }
 
     public List<Actividad> delDia(String astronautaId, LocalDate fecha) {
-        return actividadRepository.findByAstronautIdAndFecha(astronautaId, fecha);
+        return actividadRepository.findByAstronautaIdAndFecha(astronautaId, fecha);
     }
 
     public List<Actividad> entre(String astronautaId, LocalDate desde, LocalDate hasta) {
-        return actividadRepository.findByAstronautIdAndFechaBetweenOrderByFecha(astronautaId, desde, hasta);
+        return actividadRepository.findByAstronautaIdAndFechaBetweenOrderByFecha(astronautaId, desde, hasta);
     }
 
     public Actividad cambiarEstado(String id, EstadoActividad estado) {

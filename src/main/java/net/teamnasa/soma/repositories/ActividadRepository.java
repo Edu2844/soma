@@ -12,12 +12,13 @@ import java.util.List;
 @Repository
 public interface ActividadRepository extends MongoRepository<Actividad, String> {
 
-    List<Actividad> findByAstronautIdAndFecha(String astronautaId, LocalDate fecha);
+    List<Actividad> findByAstronautaIdAndFecha(String astronautaId, LocalDate fecha);
 
-    List<Actividad> findByAstronautIdAndFechaBetweenOrderByFecha(String astronautaId, LocalDate desde, LocalDate hasta);
+    List<Actividad> findByAstronautaIdAndFechaBetweenOrderByFecha(String astronautaId, LocalDate desde,
+                                                                  LocalDate hasta);
 
-    List<Actividad> findByAstronautIdAndEstado(String astronautaId, EstadoActividad estado);
+    //List<Actividad> findByAstronautaIdAndEstado(String astronautaId, EstadoActividad estado);
 
-    List<Actividad> findByAstronautIdAndTipo(String astronautaId, TipoActividad actividad);
+    //List<Actividad> findByAstronautaIdAndTipo(String astronautaId, TipoActividad actividad);
 
 }

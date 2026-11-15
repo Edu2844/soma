@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface AstronautaRepository extends MongoRepository<Astronauta, String> {
 
-    List<Astronauta> findByTripulationId(String tripulacionId);
+    List<Astronauta> findByTripulacionId(String tripulacionId);
 
-    Optional<Astronauta> findByName(String nombre);
+    Optional<Astronauta> findByNombre(String nombre);
 }

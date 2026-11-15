@@ -14,7 +14,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public Usuario autenticar(String codigo, String password) {
-        Usuario u = usuarioRepository.findByCode(codigo)
+        Usuario u = usuarioRepository.findByCodigo(codigo)
                 .filter(Usuario::isActivo)
                 .filter(x -> passwordEncoder.matches(password, x.getPasswordHash()))
                 .orElseThrow(CredencialesInvalidasException::new);
