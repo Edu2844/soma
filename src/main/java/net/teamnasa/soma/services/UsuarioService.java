@@ -15,8 +15,6 @@ public class UsuarioService {
 
 
     public Usuario crear(String codigo, String passwordPlano, RolUsuario rol, String astronautaId){
-
-
-
+    return null;
     }
 }
