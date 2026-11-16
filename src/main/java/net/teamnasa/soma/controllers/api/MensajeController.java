@@ -24,7 +24,6 @@ public class MensajeController {
     private final MensajeService mensajeService;
     private final MensajeMapper mapper;
 
-    // POST /api/mensajes  { "astronautaId": "...", "texto": "...", "prioridad": "URGENTE" }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize(Permisos.STAFF)
@@ -32,7 +31,6 @@ public class MensajeController {
         return mapper.toResponse(mensajeService.enviar(r.astronautaId(), r.texto(), r.prioridad(), auth.getName()));
     }
 
-    // Mensajes recibidos por el usuario actual (su astronauta)
     @GetMapping("/mios")
     public List<MensajeResponse> mios(Authentication auth) {
         String astronautaId = astronautaDe(auth);
@@ -57,7 +55,6 @@ public class MensajeController {
         return mapper.toResponse(mensajeService.marcarLeido(id, astronautaDe(auth)));
     }
 
-    // Historial de mensajes enviados a un astronauta (personal médico)
     @GetMapping("/astronauta/{astronautaId}")
     @PreAuthorize(Permisos.STAFF)
     public List<MensajeResponse> deAstronauta(@PathVariable String astronautaId) {

@@ -17,8 +17,5 @@ public interface ActividadRepository extends MongoRepository<Actividad, String> 
     List<Actividad> findByAstronautaIdAndFechaBetweenOrderByFecha(String astronautaId, LocalDate desde,
                                                                   LocalDate hasta);
 
-    //List<Actividad> findByAstronautaIdAndEstado(String astronautaId, EstadoActividad estado);
-
-    //List<Actividad> findByAstronautaIdAndTipo(String astronautaId, TipoActividad actividad);
 
 }

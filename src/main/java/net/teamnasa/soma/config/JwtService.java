@@ -17,7 +17,6 @@ import java.util.Date;
 @Slf4j
 @Service
 public class JwtService {
-    // HS256 necesita una clave de al menos 256 bits (32 bytes)
     private static final int MIN_BYTES_CLAVE = 32;
 
     private final SecretKey key;
@@ -52,7 +51,6 @@ public class JwtService {
                 .compact();
     }
 
-    // Lanza JwtException si el token es inválido, está manipulado o expiró
     public Claims parsear(String token) {
         return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }

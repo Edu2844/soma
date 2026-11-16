@@ -40,7 +40,6 @@ public class DataSeeder implements CommandLineRunner {
 
         // 1. Usuarios del sistema
         Usuario admin = usuarioService.crear("admin", "admin1234", RolUsuario.ADMIN, null);
-        // El médico es un tripulante a bordo (oficial médico): se crea más abajo junto a su astronauta
 
         // 2. Misión (queda EN_CURSO)
         Mision mision = misionService.crear(Mision.builder()
@@ -64,7 +63,7 @@ public class DataSeeder implements CommandLineRunner {
         // 3. Tripulación
         Tripulacion trip = tripulacionService.crear("Tripulación Alfa", mision.getId());
 
-        // 4. Astronautas (+ usuario de cada uno)
+        // 4. Astronautas
         Astronauta elena = crearAstronauta("Dra. Elena Vance", CargoMision.COMANDANTE, "O+", 64.5, 58, "elena.vance");
         Astronauta marco = crearAstronauta("Marco Ruiz", CargoMision.PILOTO, "A+", 78.0, 62, "marco.ruiz");
         Astronauta aiko  = crearAstronauta("Aiko Tanaka", CargoMision.INGENIERO_VUELO, "B-", 58.2, 60, "aiko.tanaka");
@@ -84,7 +83,7 @@ public class DataSeeder implements CommandLineRunner {
 
         for (int i = 0; i < equipo.size(); i++) {
             for (int d = 6; d >= 0; d--) {
-                boolean malDia = (i == 1 && d <= 1);     // Marco: últimos 2 días con problemas
+                boolean malDia = (i == 1 && d <= 1);
                 Instant fecha = hoy.minus(d, ChronoUnit.DAYS).plus(22, ChronoUnit.HOURS);
 
                 metricaService.registrar(Metrica.builder()
@@ -180,4 +179,4 @@ public class DataSeeder implements CommandLineRunner {
     private Actividad actividad(Astronauta a, String nombre, TipoActividad tipo, LocalDate fecha, int min) {
         return Actividad.builder().astronautaId(a.getId()).nombre(nombre).tipoActividad(tipo).fecha(fecha).duracionMin(min).build();
     }
-}
+}
