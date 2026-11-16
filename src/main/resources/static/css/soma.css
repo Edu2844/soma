@@ -457,3 +457,20 @@ table.data tr.filler td { height: 61px; border-bottom-color: transparent; }
 /* neutral avatars (status is shown by the colored status text) and equal tab heights */
 .avatar.none { background: var(--field); border-color: var(--rule); color: var(--muted); }
 .tab-panel { min-height: 490px; }
+
+/* Needs your review: one expandable row per crew member */
+.rv-item { border-bottom: 1px solid var(--line); }
+.rv-item:last-child { border-bottom: 0; }
+.rv-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 0; }
+.rv-toggle {
+  flex: 1; min-width: 260px; display: flex; align-items: center; gap: 12px; text-align: left;
+  background: none; border: 0; padding: 6px 4px; border-radius: var(--radius); color: var(--ink); cursor: pointer; font-size: 15px;
+}
+.rv-toggle:hover { background: var(--field); }
+.rv-chevron { width: 18px; font-size: 20px; line-height: 1; color: var(--faint); transition: transform .15s ease; }
+.rv-item.open .rv-chevron { transform: rotate(90deg); }
+.rv-name { font-weight: 700; }
+.rv-sum { margin-left: auto; font-size: 13px; color: var(--faint); }
+.rv-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.rv-body { padding: 0 0 12px 34px; }
+@media (prefers-reduced-motion: reduce) { .rv-chevron { transition: none; } }

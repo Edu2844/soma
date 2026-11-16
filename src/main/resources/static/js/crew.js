@@ -13,6 +13,7 @@
     ["ok", "Normal", "var(--ok)"], ["none", "No data", "var(--none)"]
   ];
   let rows = [], mision = null, tab = "overview", page = 0;
+  let openReview = null;   // astronaut id whose "Needs your review" details are expanded
   try { tab = sessionStorage.getItem("soma.crewTab") || "overview"; } catch (e) { /* default tab */ }
 
   try {
@@ -122,19 +123,34 @@
       pie(250) + '<div class="pie-legend">' + legend + "</div></div></div>";
   }
 
-  // ---------------------------------------------------------------- needs review (list)
+  // ---------------------------------------------------------------- needs review (expandable list)
   function review() {
-    const focus = rows.find(r => r.ev.overall === "crit" || r.ev.overall === "warn");
-    if (!focus) {
-      return rows.length ? '<section class="panel"><h2>Needs your review</h2><p class="empty">Every crew member is within range. Nothing needs your review right now.</p></section>' : "";
+    const people = rows.filter(r => r.ev.overall === "crit" || r.ev.overall === "warn");
+    if (!rows.length) return "";
+    if (!people.length) {
+      return '<section class="panel"><h2>Needs your review</h2><p class="empty">Every crew member is within range. Nothing needs your review right now.</p></section>';
     }
-    const items = S.issues(focus.ev).slice(0, 8);
-    const list = items.map(i => '<div class="review-row"><span class="lvl txt-' + i.level + '">' + S.LEVEL_NAME[i.level] + '</span><span class="grow">' + S.esc(i.text) + "</span></div>").join("") +
-      (focus.activeCrit ? '<div class="review-row"><span class="lvl txt-crit">Alerts</span><span class="grow">' + focus.activeCrit + " critical alert" +
-        (focus.activeCrit > 1 ? "s" : "") + ' waiting. <a href="alerts.html?astronauta=' + encodeURIComponent(focus.a.id) + '">Review alerts</a></span></div>' : "");
-    return '<section class="panel"><div class="panel-head" style="margin-bottom:6px"><h2>Needs your review: ' + S.esc(focus.a.nombre) + "</h2>" +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn secondary" href="status.html?astronauta=' + encodeURIComponent(focus.a.id) + '">Open full record</a>' +
-      '<button class="btn" type="button" id="contact" data-id="' + S.esc(focus.a.id) + '" aria-haspopup="dialog">Contact astronaut</button></div></div>' + list + "</section>";
+    if (openReview === null) openReview = people[0].a.id;   // the most urgent one starts open
+    const items = people.map(r => {
+      const id = r.a.id, open = openReview === id;
+      const issues = S.issues(r.ev);
+      const crit = issues.filter(i => i.level === "crit").length, warn = issues.filter(i => i.level === "warn").length;
+      const summary = [crit ? crit + " critical" : "", warn ? warn + " caution" : "", r.active.length ? r.active.length + " active alerts" : ""].filter(Boolean).join(" · ");
+      const details = issues.map(i => '<div class="review-row"><span class="lvl txt-' + i.level + '">' + S.LEVEL_NAME[i.level] + '</span><span class="grow">' + S.esc(i.text) + "</span></div>").join("") +
+        (r.activeCrit ? '<div class="review-row"><span class="lvl txt-crit">Alerts</span><span class="grow">' + r.activeCrit + " critical alert" +
+          (r.activeCrit > 1 ? "s" : "") + ' waiting. <a href="alerts.html?astronauta=' + encodeURIComponent(id) + '">Review alerts</a></span></div>' : "");
+      return '<div class="rv-item' + (open ? " open" : "") + '">' +
+        '<div class="rv-head">' +
+        '<button type="button" class="rv-toggle" data-review="' + S.esc(id) + '" aria-expanded="' + open + '" aria-controls="rv-' + S.esc(id) + '">' +
+        '<span class="rv-chevron" aria-hidden="true">›</span>' +
+        '<span class="rv-name">' + S.esc(r.a.nombre) + '<span class="cell-sub"> · ' + S.esc(S.CARGOS[r.a.cargo] || r.a.cargo || "") + "</span></span>" +
+        S.status(r.ev.overall) + '<span class="rv-sum">' + S.esc(summary) + "</span></button>" +
+        '<div class="rv-actions"><a class="btn secondary small" href="status.html?astronauta=' + encodeURIComponent(id) + '">Open full record</a>' +
+        '<button class="btn small" type="button" data-contact="' + S.esc(id) + '" aria-haspopup="dialog">Contact astronaut</button></div></div>' +
+        '<div class="rv-body" id="rv-' + S.esc(id) + '"' + (open ? "" : " hidden") + ">" + details + "</div></div>";
+    }).join("");
+    return '<section class="panel"><div class="panel-head" style="margin-bottom:4px"><h2>Needs your review</h2>' +
+      '<span class="note">' + people.length + (people.length === 1 ? " crew member" : " crew members") + " · most urgent first</span></div>" + items + "</section>";
   }
 
   function render() {
@@ -166,14 +182,19 @@
       if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft") return;
       tab = tab === "overview" ? "health" : "overview"; render(); document.getElementById("tab-" + tab).focus();
     });
-    const contact = document.getElementById("contact");
-    if (contact) contact.addEventListener("click", () => {
-      const r = rows.find(x => x.a.id === contact.dataset.id);
+    main.querySelectorAll("[data-review]").forEach(b => b.addEventListener("click", () => {
+      openReview = openReview === b.dataset.review ? "" : b.dataset.review;
+      const scrollY = window.scrollY;
+      render();
+      window.scrollTo(0, scrollY);
+    }));
+    main.querySelectorAll("[data-contact]").forEach(contact => contact.addEventListener("click", () => {
+      const r = rows.find(x => x.a.id === contact.dataset.contact);
       const labels = S.issues(r.ev).map(i => (S.METRICS[i.key] ? S.METRICS[i.key].label : "radiation dose").toLowerCase()).slice(0, 3);
       S.openCompose(contact, r.a, labels.length
         ? "Please come to the medical bay today for a review of your " + labels.join(", ").replace(/, ([^,]*)$/, " and $1") + " readings."
         : "Please come to the medical bay for a routine check-up.");
-    });
+    }));
     const exp = document.getElementById("export");
     if (exp) exp.addEventListener("click", exportXlsx);
   }
