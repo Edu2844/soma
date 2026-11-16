@@ -16,5 +16,4 @@ public interface UsuarioRepository extends MongoRepository<Usuario, String> {
     boolean existsByCodigo(String codigo);
     boolean existsByAstronautaId(String astronautaId);
 
-    //Optional<Usuario> findByAstronautId(String astronautaId);
 }

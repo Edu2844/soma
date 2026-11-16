@@ -37,9 +37,8 @@ public class ActividadService {
 
     public Actividad cambiarEstado(String id, EstadoActividad estado) {
         Actividad a = actividadRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Actividad no encontrada: " + id));
-        // El tripulante solo marca sus propias actividades
         acceso.exigirStaffOPropio(a.getAstronautaId());
         a.setEstadoActividad(estado);
         return actividadRepository.save(a);
     }
-}
+}

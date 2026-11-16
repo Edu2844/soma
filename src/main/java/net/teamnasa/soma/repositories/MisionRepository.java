@@ -12,5 +12,4 @@ public interface MisionRepository extends MongoRepository<Mision,String> {
 
     List<Mision> findByFaseMision(FaseMision mision);
 
-    //List<Mision> findByDescription(ParametrosMision descripcion);
 }

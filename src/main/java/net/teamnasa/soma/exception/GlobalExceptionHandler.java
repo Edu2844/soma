@@ -50,19 +50,17 @@ public class GlobalExceptionHandler {
         return respuesta(HttpStatus.BAD_REQUEST, "JSON mal formado o valor de enum inválido", List.of());
     }
 
-    // Archivo o ruta inexistente (por ejemplo una pagina o imagen que no esta en /static): es un 404, no un 500
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> recursoNoEncontrado(NoResourceFoundException e) {
         return respuesta(HttpStatus.NOT_FOUND, "Recurso no encontrado: /" + e.getResourcePath(), List.of());
     }
 
-    // Falta un parametro obligatorio, por ejemplo ?fecha= en /api/actividades/astronauta/{id}
+
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> parametroFaltante(MissingServletRequestParameterException e) {
         return respuesta(HttpStatus.BAD_REQUEST, "Falta el parametro: " + e.getParameterName(), List.of());
     }
 
-    // Parametro con formato o valor invalido, por ejemplo ?estado=OTRA o una fecha mal escrita
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> parametroInvalido(MethodArgumentTypeMismatchException e) {
         return respuesta(HttpStatus.BAD_REQUEST, "Valor invalido para el parametro: " + e.getName(), List.of());
@@ -88,4 +86,4 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ErrorResponse> respuesta(HttpStatus status, String mensaje, List<String> detalles) {
         return ResponseEntity.status(status).body(new ErrorResponse(Instant.now(), status.value(), status.getReasonPhrase(), mensaje, detalles));
     }
-}
+}

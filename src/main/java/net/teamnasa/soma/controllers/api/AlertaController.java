@@ -45,7 +45,6 @@ public class AlertaController {
         return mapper.toResponse(alertaService.resolver(id, auth.getName()));
     }
 
-    // Deshace "reconocer" o "resolver": la alerta vuelve a ACTIVA
     @PatchMapping("/{id}/reactivar")
     @PreAuthorize(Permisos.STAFF)
     public AlertaResponse reactivar(@PathVariable String id) {

@@ -17,18 +17,12 @@ public class AccesoService {
                 && astronautaId.equals(u.astronautaId());
     }
 
-    /** ADMIN o MEDICO. */
     public boolean esStaff(Authentication auth) {
         return auth != null
                 && auth.getPrincipal() instanceof UsuarioAutenticado u
                 && (u.rol() == RolUsuario.ADMIN || u.rol() == RolUsuario.MEDICO);
     }
 
-    /**
-     * Lanza AccessDeniedException (403) si el usuario actual no es personal médico/admin
-     * ni el propio astronauta. Los procesos internos sin usuario (por ejemplo el DataSeeder
-     * al arrancar) no tienen autenticación y se permiten.
-     */
     public void exigirStaffOPropio(String astronautaId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {

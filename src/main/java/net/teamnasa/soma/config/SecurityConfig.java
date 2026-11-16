@@ -27,8 +27,6 @@ public class SecurityConfig {
     private static final String ADMIN = "ADMIN";
     private static final String MEDICO = "MEDICO";
 
-    // Archivos del frontend (HTML, CSS, JS, imagenes). Son publicos: la seguridad
-    // esta en la API, que exige el token JWT. Sin esto el navegador recibia 401.
     private static final String[] FRONTEND_PUBLICO = {
             "/", "/index.html", "/*.html", "/favicon.ico",
             "/css/**", "/js/**", "/img/**", "/assets/**", "/fonts/**"
@@ -97,10 +95,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * Permite el acceso a ADMIN/MEDICO, o al TRIPULANTE cuyo astronautaId coincide con la
-     * variable de la ruta (por ejemplo /api/metricas/astronauta/{astronautaId}).
-     */
+
     private static AuthorizationManager<RequestAuthorizationContext> staffOPropio(AccesoService acceso, String variable) {
         return (autenticacion, contexto) -> {
             Authentication a = autenticacion.get();

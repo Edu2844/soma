@@ -22,7 +22,6 @@ public class MensajeService {
     private final AstronautaRepository astronautaRepository;
     private final UsuarioRepository usuarioRepository;
 
-    /** El oficial médico (o admin) envía un mensaje a un tripulante. */
     public Mensaje enviar(String astronautaId, String texto, PrioridadMensaje prioridad, String remitenteUsuarioId) {
         if (!astronautaRepository.existsById(astronautaId)) {
             throw new NoSuchElementException("Astronauta no encontrado: " + astronautaId);
@@ -42,7 +41,6 @@ public class MensajeService {
                 .build());
     }
 
-    /** Últimos 50 mensajes recibidos por un astronauta, del más reciente al más antiguo. */
     public List<Mensaje> recibidos(String astronautaId) {
         return mensajeRepository.findTop50ByAstronautaIdOrderByFechaDesc(astronautaId);
     }
@@ -51,7 +49,6 @@ public class MensajeService {
         return mensajeRepository.countByAstronautaIdAndLeidoFalse(astronautaId);
     }
 
-    /** Solo el destinatario puede marcar su mensaje como leído. */
     public Mensaje marcarLeido(String id, String astronautaIdUsuario) {
         Mensaje m = mensajeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Mensaje no encontrado: " + id));
@@ -66,7 +63,6 @@ public class MensajeService {
         return m;
     }
 
-    /** Marca como leídos todos los mensajes pendientes del astronauta. Devuelve cuántos cambió. */
     public int marcarTodosLeidos(String astronautaId) {
         List<Mensaje> pendientes = mensajeRepository.findByAstronautaIdAndLeidoFalse(astronautaId);
         Instant ahora = Instant.now();
