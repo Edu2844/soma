@@ -7,8 +7,8 @@ import net.teamnasa.soma.models.enums.TipoAlerta;
 import org.springframework.data.domain.Page;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
 
-import java.awt.print.Pageable;
 import java.util.List;
 
 @Repository
@@ -16,7 +16,7 @@ public interface AlertaRepository extends MongoRepository<Alerta,String> {
 
     Page<Alerta> findByEstado(EstadoAlerta estado, Pageable pagina);
 
-    Page<Alerta> findByTipo(TipoAlerta tipo, Pageable pagina);
+    Page<Alerta> findByTipoAlerta(TipoAlerta tipo, Pageable pagina);
 
     Page<Alerta> findBySeveridad(Severidad severidad, Pageable pagina);
 
