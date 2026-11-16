@@ -22,6 +22,9 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
+    /** Último día con métricas y alertas de demo. */
+    private static final LocalDate ULTIMO_DIA = LocalDate.of(2026, 11, 14);
+
     private final UsuarioRepository usuarioRepository;
     private final UsuarioService usuarioService;
     private final MisionService misionService;
@@ -77,15 +80,49 @@ public class DataSeeder implements CommandLineRunner {
         }
         tripulacionService.asignarComandante(trip.getId(), elena.getId());
 
-        // 5. Métricas diarias de los últimos 7 días
+        // 5. Métricas diarias: 7 días que terminan en ULTIMO_DIA (un registro por astronauta y día)
         Random rnd = new Random(42);
         List<Astronauta> equipo = List.of(elena, marco, aiko, tomas);
-        Instant hoy = Instant.now().truncatedTo(ChronoUnit.DAYS);
+        Instant hoy = ULTIMO_DIA.atStartOfDay(ZoneOffset.UTC).toInstant();
 
         for (int i = 0; i < equipo.size(); i++) {
             for (int d = 6; d >= 0; d--) {
-                boolean malDia = (i == 1 && d <= 1);     // Marco: últimos 2 días con problemas
                 Instant fecha = hoy.minus(d, ChronoUnit.DAYS).plus(22, ChronoUnit.HOURS);
+
+                // Valores normales
+                int fcReposo = 58 + rnd.nextInt(6);
+                int fcPromedio = 64 + rnd.nextInt(10);
+                int sistolica = 112 + rnd.nextInt(12);
+                int diastolica = 72 + rnd.nextInt(8);
+                double spo2 = 97.0 + (d % 3) * 0.5;
+                double temperatura = 36.5 + (d % 3) * 0.1;
+                double horasSueno = 7.0 + rnd.nextInt(2) * 0.5;
+                int estres = 2 + rnd.nextInt(3);
+                int fatiga = 1 + rnd.nextInt(3);
+                int animo = 4;
+                double dosis = 0.4 + rnd.nextInt(20) / 100.0;
+                double tasaPico = 18.0 + rnd.nextInt(10);
+                int minCardio = 55 + rnd.nextInt(10);
+                int minFuerza = 60 + rnd.nextInt(10);
+                double glucosa = 92.0 + d;
+
+                // Días con lecturas fuera de rango (d = 0 es ULTIMO_DIA)
+                if (i == 1 && d <= 1) {            // Marco: últimos 2 días con problemas
+                    fcPromedio = 108; sistolica = 138; spo2 = 93.5; temperatura = 37.9;
+                    horasSueno = 4.5; estres = 9; fatiga = 8; animo = 2; minCardio = 20; glucosa = 192.0;
+                } else if (i == 1 && d == 4) {     // Marco: mala noche
+                    horasSueno = 5.5; estres = 7; fatiga = 6; animo = 3;
+                } else if (i == 0 && d == 2) {     // Elena: fiebre
+                    fcPromedio = 102; temperatura = 38.6; spo2 = 94.0; fatiga = 7; animo = 3;
+                } else if (i == 2 && d == 0) {     // Aiko: insomnio y estrés
+                    horasSueno = 4.8; estres = 8; fatiga = 7; animo = 2;
+                } else if (i == 2 && d == 3) {     // Aiko: glucosa baja
+                    glucosa = 62.0; fatiga = 5;
+                } else if (i == 3 && d == 1) {     // Tomás: presión alta
+                    sistolica = 142; diastolica = 88; estres = 6;
+                } else if (i == 3 && d == 5) {     // Tomás: poco ejercicio
+                    minCardio = 15; minFuerza = 20;
+                }
 
                 metricaService.registrar(Metrica.builder()
                         .astronautaId(equipo.get(i).getId())
@@ -93,29 +130,29 @@ public class DataSeeder implements CommandLineRunner {
                         .frecuencia(Frecuencia.DIARIO)
                         .metricasSalud(MetricasSalud.builder()
                                 .cardiologia(Cardiologia.builder()
-                                        .fcReposoBpm(58 + rnd.nextInt(6))
-                                        .fcPromedioBpm(malDia ? 108 : 64 + rnd.nextInt(10))
-                                        .presionSistolica(malDia ? 138 : 112 + rnd.nextInt(12))
-                                        .presionDiastolica(72 + rnd.nextInt(8))
-                                        .spo2Pct(malDia ? 93.5 : 97.0 + (d % 3) * 0.5)
-                                        .temperaturaC(malDia ? 37.9 : 36.5 + (d % 3) * 0.1)
+                                        .fcReposoBpm(fcReposo)
+                                        .fcPromedioBpm(fcPromedio)
+                                        .presionSistolica(sistolica)
+                                        .presionDiastolica(diastolica)
+                                        .spo2Pct(spo2)
+                                        .temperaturaC(temperatura)
                                         .build())
                                 .psicologiaSueno(PsicologiaSueno.builder()
-                                        .horasSueno(malDia ? 4.5 : 7.0 + rnd.nextInt(2) * 0.5)
-                                        .nivelEstres(malDia ? 9 : 2 + rnd.nextInt(3))
-                                        .fatigaMental(malDia ? 8 : 1 + rnd.nextInt(3))
-                                        .estadoAnimo(malDia ? 2 : 4)
+                                        .horasSueno(horasSueno)
+                                        .nivelEstres(estres)
+                                        .fatigaMental(fatiga)
+                                        .estadoAnimo(animo)
                                         .build())
                                 .radiologia(Radiologia.builder()
-                                        .dosisDiariaMsv(0.4 + rnd.nextInt(20) / 100.0)
-                                        .tasaPicoUsvH(18.0 + rnd.nextInt(10))
+                                        .dosisDiariaMsv(dosis)
+                                        .tasaPicoUsvH(tasaPico)
                                         .build())
                                 .medicinaDeportiva(MedicinaDeportiva.builder()
-                                        .minCardio(malDia ? 20 : 55 + rnd.nextInt(10))
-                                        .minFuerzaAred(60 + rnd.nextInt(10))
+                                        .minCardio(minCardio)
+                                        .minFuerzaAred(minFuerza)
                                         .build())
                                 .hematologia(Hematologia.builder()
-                                        .glucosaMgDl(malDia ? 192.0 : 92.0 + d)
+                                        .glucosaMgDl(glucosa)
                                         .build())
                                 .build())
                         .build());

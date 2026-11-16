@@ -19,7 +19,7 @@ public abstract class ReglaBase implements ReglaAlerta {
                 .tipoAlerta(tipo).severidad(sev)
                 .estado(EstadoAlerta.ACTIVA)
                 .mensaje(mensaje)
-                .fecha(Instant.now())
+                .fecha(m.getFecha() != null ? m.getFecha() : Instant.now())
                 .build();
     }
-}
+}
