@@ -22,6 +22,18 @@ public class UsuarioService {
         if (usuarioRepository.existsByCodigo(codigo)){
             throw new IllegalStateException("Ya existe un usuario con el código: " + codigo);
         }
+        // Tripulantes y médicos viajan a bordo: su cuenta debe estar vinculada a un astronauta
+        if (rol == RolUsuario.TRIPULANTE || rol == RolUsuario.MEDICO) {
+            if (astronautaId == null || astronautaId.isBlank()) {
+                throw new IllegalArgumentException("Los tripulantes y médicos deben estar vinculados a un astronauta");
+            }
+            if (!astronautaRepository.existsById(astronautaId)) {
+                throw new NoSuchElementException("Astronauta no encontrado: " + astronautaId);
+            }
+            if (usuarioRepository.existsByAstronautaId(astronautaId)) {
+                throw new IllegalStateException("Ese astronauta ya tiene una cuenta de usuario");
+            }
+        }
 
         return usuarioRepository.save(Usuario.builder()
                 .codigo(codigo)

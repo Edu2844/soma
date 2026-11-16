@@ -4,5 +4,6 @@ public enum CargoMision {
     COMANDANTE,
     PILOTO,
     INGENIERO_VUELO,
-    ESPECIALISTA
+    ESPECIALISTA,
+    OFICIAL_MEDICO
 }

@@ -27,6 +27,13 @@ public class ReglaPsicologiaSueno extends ReglaBase {
         if (ps.getNivelEstres() != null && ps.getNivelEstres() >= 8) {
             r.add(alerta(m, TipoAlerta.PSICOLOGIA, Severidad.CRITICA, "Nivel de estrés muy alto: " + ps.getNivelEstres() + "/10"));
         }
+        if (ps.getEstadoAnimo() != null) {
+            if (ps.getEstadoAnimo() <= 1) {
+                r.add(alerta(m, TipoAlerta.PSICOLOGIA, Severidad.CRITICA, "Estado de ánimo muy bajo: " + ps.getEstadoAnimo() + "/5"));
+            } else if (ps.getEstadoAnimo() == 2) {
+                r.add(alerta(m, TipoAlerta.PSICOLOGIA, Severidad.PRECAUCION, "Estado de ánimo bajo: " + ps.getEstadoAnimo() + "/5"));
+            }
+        }
         return r;
     }
-}
+}

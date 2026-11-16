@@ -16,6 +16,7 @@ import java.util.NoSuchElementException;
 public class ActividadService {
     private final ActividadRepository actividadRepository;
     private final AstronautaRepository astronautaRepository;
+    private final AccesoService acceso;
 
     public Actividad asignar(Actividad a) {
         if (!astronautaRepository.existsById(a.getAstronautaId())) {
@@ -36,7 +37,9 @@ public class ActividadService {
 
     public Actividad cambiarEstado(String id, EstadoActividad estado) {
         Actividad a = actividadRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Actividad no encontrada: " + id));
+        // El tripulante solo marca sus propias actividades
+        acceso.exigirStaffOPropio(a.getAstronautaId());
         a.setEstadoActividad(estado);
         return actividadRepository.save(a);
     }
-}
+}

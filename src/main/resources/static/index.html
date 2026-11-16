@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOMA · Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="css/soma.css">
+<script src="js/theme.js"></script>
+</head>
+<body>
+<div class="login-top"><button type="button" class="theme-toggle" id="theme-toggle"></button></div>
+<div class="login-wrap">
+  <form class="login" id="login-form" novalidate>
+    <div class="brand" style="padding:0">
+      <span><span class="brand-name">SOMA</span><br><span class="brand-sub">Crew health file</span></span>
+    </div>
+    <h1>Sign in</h1>
+    <p>Use the crew code and password assigned by your mission.</p>
+    <div id="login-msg" role="alert"></div>
+    <div class="group">
+      <label class="lbl" for="codigo">Crew code</label>
+      <input class="field" id="codigo" name="codigo" autocomplete="username" required>
+    </div>
+    <div class="group">
+      <label class="lbl" for="password">Password</label>
+      <input class="field" id="password" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="btn" type="submit" id="login-btn">Sign in</button>
+    <div class="foot">Health monitoring for long-duration missions. Readings are reviewed by your crew medical officer.
+      <br>Based on <a href="https://www.nasa.gov/hrp/risks/#Human-Physiology" target="_blank" rel="noopener noreferrer">NASA HRP human physiology risks</a>
+      and the <a href="https://osdr.nasa.gov/bio/repo/data/studies/OSD-569" target="_blank" rel="noopener noreferrer">NASA OSDR OSD-569</a> crew dataset.</div>
+  </form>
+</div>
+<script src="js/soma.js"></script>
+<script>
+(function () {
+  SomaTheme.bind(document.getElementById("theme-toggle"));
+  const user = Soma.getUser();
+  if (Soma.getToken() && user) { window.location.href = Soma.homeFor(user); return; }
+
+  const form = document.getElementById("login-form");
+  const msg = document.getElementById("login-msg");
+  const btn = document.getElementById("login-btn");
+  const notice = (level, text) => "<div class=\"notice " + level + "\" style=\"margin-bottom:16px\"><div>" + Soma.esc(text) + "</div></div>";
+
+  if (new URLSearchParams(location.search).get("expired")) msg.innerHTML = notice("warn", "Your session expired. Sign in again.");
+
+  form.addEventListener("submit", async function (ev) {
+    ev.preventDefault();
+    const codigo = form.codigo.value.trim();
+    const password = form.password.value;
+    if (!codigo || !password) { msg.innerHTML = notice("warn", "Enter your crew code and password."); return; }
+    btn.disabled = true; btn.textContent = "Signing in…";
+    try {
+      const res = await Soma.api("/api/auth/login", { method: "POST", body: { codigo, password }, allow401: true });
+      Soma.saveSession(res.token, res.usuario);
+      window.location.href = Soma.homeFor(res.usuario);
+    } catch (e) {
+      msg.innerHTML = notice("crit", e.status === 401 ? "Crew code or password is incorrect." : e.message);
+      btn.disabled = false; btn.textContent = "Sign in";
+    }
+  });
+})();
+</script>
+</body>
+</html>

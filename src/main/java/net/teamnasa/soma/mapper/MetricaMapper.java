@@ -15,6 +15,7 @@ public class MetricaMapper {
                 .frecuencia(r.frecuencia())
                 .nombreProtocolo(r.nombreProtocolo())
                 .metricasSalud(r.metricasSalud())
+                .notas(r.notas())
                 .build();
     }
 
@@ -25,7 +26,8 @@ public class MetricaMapper {
                 m.getFecha(),
                 m.getFrecuencia(),
                 m.getNombreProtocolo(),
-                m.getMetricasSalud()
+                m.getMetricasSalud(),
+                m.getNotas()
         );
     }
-}
+}

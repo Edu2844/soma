@@ -6,5 +6,7 @@ public enum TipoAlerta {
     RADIACION,
     DEPORTIVA,
     HEMATOLOGIA,
-    SUENO
+    SUENO,
+    SIGNOS_VITALES,
+    METABOLISMO
 }

@@ -29,6 +29,7 @@ public class DataSeeder implements CommandLineRunner {
     private final AstronautaService astronautaService;
     private final ActividadService actividadService;
     private final MetricaService metricaService;
+    private final MensajeService mensajeService;
 
     @Override
     public void run(String... args) {
@@ -39,7 +40,7 @@ public class DataSeeder implements CommandLineRunner {
 
         // 1. Usuarios del sistema
         Usuario admin = usuarioService.crear("admin", "admin1234", RolUsuario.ADMIN, null);
-        Usuario medico = usuarioService.crear("medico01", "medico1234", RolUsuario.MEDICO, null);
+        // El médico es un tripulante a bordo (oficial médico): se crea más abajo junto a su astronauta
 
         // 2. Misión (queda EN_CURSO)
         Mision mision = misionService.crear(Mision.builder()
@@ -52,6 +53,10 @@ public class DataSeeder implements CommandLineRunner {
                         .fcMaxBpm(100)
                         .presionSistolicaMax(130)
                         .horasSuenoMin(6.5)
+                        .spo2MinPct(95.0)
+                        .temperaturaMaxC(37.5)
+                        .glucosaMinMgDl(70.0)
+                        .glucosaMaxMgDl(180.0)
                         .build())
                 .build());
         misionService.cambiarFase(mision.getId(), FaseMision.EN_CURSO, "Lanzamiento", admin.getId());
@@ -63,15 +68,18 @@ public class DataSeeder implements CommandLineRunner {
         Astronauta elena = crearAstronauta("Dra. Elena Vance", CargoMision.COMANDANTE, "O+", 64.5, 58, "elena.vance");
         Astronauta marco = crearAstronauta("Marco Ruiz", CargoMision.PILOTO, "A+", 78.0, 62, "marco.ruiz");
         Astronauta aiko  = crearAstronauta("Aiko Tanaka", CargoMision.INGENIERO_VUELO, "B-", 58.2, 60, "aiko.tanaka");
+        Astronauta tomas = crearAstronauta("Dr. Tomás Reyes", CargoMision.OFICIAL_MEDICO, "AB+", 72.0, 60,
+                "medico01", "medico1234", RolUsuario.MEDICO);
+        Usuario medico = usuarioRepository.findByCodigo("medico01").orElseThrow();
 
-        for (Astronauta a : List.of(elena, marco, aiko)) {
+        for (Astronauta a : List.of(elena, marco, aiko, tomas)) {
             tripulacionService.agregarAstronauta(trip.getId(), a.getId());
         }
         tripulacionService.asignarComandante(trip.getId(), elena.getId());
 
         // 5. Métricas diarias de los últimos 7 días
         Random rnd = new Random(42);
-        List<Astronauta> equipo = List.of(elena, marco, aiko);
+        List<Astronauta> equipo = List.of(elena, marco, aiko, tomas);
         Instant hoy = Instant.now().truncatedTo(ChronoUnit.DAYS);
 
         for (int i = 0; i < equipo.size(); i++) {
@@ -89,11 +97,14 @@ public class DataSeeder implements CommandLineRunner {
                                         .fcPromedioBpm(malDia ? 108 : 64 + rnd.nextInt(10))
                                         .presionSistolica(malDia ? 138 : 112 + rnd.nextInt(12))
                                         .presionDiastolica(72 + rnd.nextInt(8))
+                                        .spo2Pct(malDia ? 93.5 : 97.0 + (d % 3) * 0.5)
+                                        .temperaturaC(malDia ? 37.9 : 36.5 + (d % 3) * 0.1)
                                         .build())
                                 .psicologiaSueno(PsicologiaSueno.builder()
                                         .horasSueno(malDia ? 4.5 : 7.0 + rnd.nextInt(2) * 0.5)
                                         .nivelEstres(malDia ? 9 : 2 + rnd.nextInt(3))
                                         .fatigaMental(malDia ? 8 : 1 + rnd.nextInt(3))
+                                        .estadoAnimo(malDia ? 2 : 4)
                                         .build())
                                 .radiologia(Radiologia.builder()
                                         .dosisDiariaMsv(0.4 + rnd.nextInt(20) / 100.0)
@@ -102,6 +113,9 @@ public class DataSeeder implements CommandLineRunner {
                                 .medicinaDeportiva(MedicinaDeportiva.builder()
                                         .minCardio(malDia ? 20 : 55 + rnd.nextInt(10))
                                         .minFuerzaAred(60 + rnd.nextInt(10))
+                                        .build())
+                                .hematologia(Hematologia.builder()
+                                        .glucosaMgDl(malDia ? 192.0 : 92.0 + d)
                                         .build())
                                 .build())
                         .build());
@@ -134,25 +148,36 @@ public class DataSeeder implements CommandLineRunner {
             actividadService.cambiarEstado(hidratacion.getId(), EstadoActividad.COMPLETADA);
         }
 
+        // 8. Mensaje de ejemplo: el oficial médico llama a revisión a Marco
+        mensajeService.enviar(marco.getId(),
+                "Please come to the medical bay today for a review of your sleep and blood pressure readings.",
+                PrioridadMensaje.URGENTE, medico.getId());
+
         log.info("DataSeeder: datos de prueba cargados");
         log.info("  admin  -> codigo=admin / admin1234 / id={}", admin.getId());
         log.info("  medico -> codigo=medico01 / medico1234 / id={}", medico.getId());
         log.info("  astronautas -> astro1234 / ids: {}, {}, {}", elena.getId(), marco.getId(), aiko.getId());
+        log.info("  oficial medico a bordo -> {} / astronautaId={}", tomas.getNombre(), tomas.getId());
     }
 
     private Astronauta crearAstronauta(String nombre, CargoMision cargo, String sangre,
                                        double peso, int fcBase, String codigoUsuario) {
+        return crearAstronauta(nombre, cargo, sangre, peso, fcBase, codigoUsuario, "astro1234", RolUsuario.TRIPULANTE);
+    }
+
+    private Astronauta crearAstronauta(String nombre, CargoMision cargo, String sangre, double peso, int fcBase,
+                                       String codigoUsuario, String password, RolUsuario rol) {
         Astronauta a = astronautaService.crear(Astronauta.builder()
                 .nombre(nombre)
                 .cargo(cargo)
                 .datosGenerales(DatosGenerales.builder()
                         .grupoSanguineo(sangre).pesoBaseKg(peso).fcReposoBaseBpm(fcBase).build())
                 .build());
-        usuarioService.crear(codigoUsuario, "astro1234", RolUsuario.TRIPULANTE, a.getId());
+        usuarioService.crear(codigoUsuario, password, rol, a.getId());
         return a;
     }
 
     private Actividad actividad(Astronauta a, String nombre, TipoActividad tipo, LocalDate fecha, int min) {
         return Actividad.builder().astronautaId(a.getId()).nombre(nombre).tipoActividad(tipo).fecha(fecha).duracionMin(min).build();
     }
-}
+}

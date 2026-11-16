@@ -30,8 +30,12 @@ public class MetricaService {
     private final TripulacionRepository tripulacionRepository;
     private final MisionService misionService;
     private final AlertaService alertaService;
+    private final AccesoService acceso;
 
     public Metrica registrar(Metrica m) {
+        // Un tripulante solo puede registrar sus propias métricas (autoevaluación)
+        acceso.exigirStaffOPropio(m.getAstronautaId());
+
         Astronauta astronauta = astronautaService.obtener(m.getAstronautaId());
 
         if (astronauta.getTripulacionId() == null) {
@@ -90,8 +94,10 @@ public class MetricaService {
     }
 
     public Metrica obtener(String id) {
-        return metricaRepository.findById(id)
+        Metrica m = metricaRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Métrica no encontrada: " + id));
+        acceso.exigirStaffOPropio(m.getAstronautaId());
+        return m;
     }
 
     public Page<Metrica> historial(String astronautaId, Pageable pageable) {
@@ -106,4 +112,4 @@ public class MetricaService {
     public List<Metrica> entre(String astronautaId, Instant desde, Instant hasta) {
         return metricaRepository.buscarEnRango(astronautaId, desde, hasta, Sort.by("fecha").ascending());
     }
-}
+}

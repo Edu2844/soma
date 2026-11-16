@@ -45,6 +45,18 @@ public class AlertaService {
         return cambiar(id, EstadoAlerta.RESUELTA, usuarioId);
     }
 
+    /** Deshace un reconocimiento o una resolución: la alerta vuelve a ACTIVA. */
+    public Alerta reactivar(String id) {
+        Alerta a = alertaRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Alerta no encontrada: " + id));
+        if (a.getEstado() == EstadoAlerta.ACTIVA) {
+            throw new IllegalStateException("La alerta ya está activa");
+        }
+        a.setEstado(EstadoAlerta.ACTIVA);
+        a.setAtendidaPor(null);
+        a.setFechaAtencion(null);
+        return alertaRepository.save(a);
+    }
+
     private Alerta cambiar(String id, EstadoAlerta nuevo, String usuarioId) {
         Alerta a = alertaRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Alerta no encontrada: " + id));
         if (a.getEstado() == EstadoAlerta.RESUELTA) {
@@ -55,4 +67,4 @@ public class AlertaService {
         a.setFechaAtencion(Instant.now());
         return alertaRepository.save(a);
     }
-}
+}

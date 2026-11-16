@@ -12,4 +12,5 @@ public class Hematologia {
     @Positive private Integer leucocitosUl;
     @PositiveOrZero
     private Double cortisolSalivalNmolL;
-}
+    @DecimalMin("20.0") @DecimalMax("600.0") private Double glucosaMgDl;
+}

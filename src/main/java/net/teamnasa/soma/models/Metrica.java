@@ -27,4 +27,6 @@ public class Metrica {
     private Frecuencia frecuencia;
     private String nombreProtocolo;
     private MetricasSalud metricasSalud;
+    /** Sintomas o comentarios escritos por el astronauta en la autoevaluacion. */
+    private String notas;
 }
